@@ -13732,7 +13732,7 @@ Series.prototype = {
 			if (stacking && series.visible && stack && stack[xValue]) {
 
 				pointStack = stack[xValue];
-				stackValues = pointStack.points[series.index + ',' + i];
+				stackValues = pointStack.points[series.index + ',' + i] || pointStack.points[series.index + ',' + (i - 1)] || pointStack.points[series.index + ',' + (i + 1)];//PO picks previous or next  data point for getting stackings lowest y value ;
 				yBottom = stackValues[0];
 				yValue = stackValues[1];
 
