@@ -13734,12 +13734,9 @@ Series.prototype = {
 				pointStack = stack[xValue];
 
         //PO - picks previous or next data point for getting stackings lowest y value
-				stackValues =
-            pointStack.points[series.index + ',' + i] ||
-            pointStack.points[series.index + ',' + (i - 1)] ||
-            pointStack.points[series.index + ',' + (i + 1)];
-
-		    if (stackValues)
+				stackValues = pointStack.points[series.index + ',' + i] || pointStack.points[(series.index) + ',' + (i + 1)] || pointStack.points[(series.index) + ',' + (i - 1)] ||
+				              pointStack.points[(series.index + 1) + ',' + i] || pointStack.points[(series.index + 1) + ',' + (i + 1)] || pointStack.points[(series.index + 1) + ',' + (i - 1)];
+		    if (stackValues) //PO Skip stacking info for null points
 		    {
 					yBottom = stackValues[0];
 					yValue = stackValues[1];
@@ -13757,7 +13754,9 @@ Series.prototype = {
 
 					// Place the stack label
 					pointStack.setOffset(series.pointXOffset || 0, series.barW || 0);
-				}
+				} else {
+		        var wef = 1;
+		    }
 			}
 
 			// Set translated yBottom or remove it
@@ -15806,7 +15805,7 @@ var AreaSeries = extendClass(Series, {
 				return a - b;
 			});
 
-			each(keys, function (x) {
+			each(keys, function (x, i) {
 				var y = 0,
 					stackPoint;
 
@@ -15820,8 +15819,7 @@ var AreaSeries = extendClass(Series, {
 				// There is no point for this X value in this series, so we
 				// insert a dummy point in order for the areas to be drawn
 				// correctly.
-				} else if (!(series.chart.skipFirst && y == 0) && !(series.chart.skipLast && y == series.chart.lastIndex)) { //PO added this value to not add first and last null points if desired.
-					// Loop down the stack to find the series below this one that has
+				} else if (!(series.chart.skipFirst && i == 0 || series.chart.skipLast && i == series.chart.lastIndex)) { //PO added this value to not add first and last null points if desired. 					// Loop down the stack to find the series below this one that has
 					// a value (#1991)
 					for (i = series.index; i <= yAxis.series.length; i++) {
 						stackPoint = stack[x].points[i + ',' + x];
@@ -15842,6 +15840,7 @@ var AreaSeries = extendClass(Series, {
 	            onMouseOver: noop
 	        });
 				}
+				else{var wf= 1}
 
 			});
 
