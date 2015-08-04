@@ -7335,7 +7335,7 @@ Axis.prototype = {
 	 * Set the tick positions to round values and optionally extend the extremes
 	 * to the nearest tick
 	 */
-	setTickInterval: function (secondPass) {
+	setTickInterval: function (secondPass, skipTicks) {
 		var axis = this,
 			chart = axis.chart,
 			options = axis.options,
@@ -7486,7 +7486,8 @@ Axis.prototype = {
 			axis.tickInterval = axis.unsquish();
 		}
 
-		this.setTickPositions();
+		if(!skipTicks)//SALEINT PO can skip tick processing when doing our own.
+			this.setTickPositions();
 	},
 
 	/**
