@@ -11543,7 +11543,6 @@ Chart.prototype = {
 				// set axes scales
 				each(axes, function (axis) {
 					axis.setScale();
-			    axis.adjustTickAmount();
 				});
 			}
 		}
@@ -11676,7 +11675,6 @@ Chart.prototype = {
 
 		each(optionsArray, function (axisOptions) {
 			axis = new Axis(chart, axisOptions);
-	    axis.adjustTickAmount();
 		});
 	},
 
@@ -12483,7 +12481,6 @@ Chart.prototype = {
 			each(axes, function (axis) {
 				if ((axis.horiz && redoHorizontal) || (!axis.horiz && redoVertical)) {
 					axis.setTickInterval(true); // update to reflect the new margins
-			    axis.adjustTickAmount();
 				}
 			});
 			chart.getMargins(); // second pass to check for new labels
