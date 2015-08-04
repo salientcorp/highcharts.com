@@ -15820,8 +15820,7 @@ var AreaSeries = extendClass(Series, {
 				// There is no point for this X value in this series, so we
 				// insert a dummy point in order for the areas to be drawn
 				// correctly.
-				} else {
-
+				} else if (!(series.chart.skipFirst && y == 0) && !(series.chart.skipLast && y == series.chart.lastIndex)) { //PO added this value to not add first and last null points if desired.
 					// Loop down the stack to find the series below this one that has
 					// a value (#1991)
 					for (i = series.index; i <= yAxis.series.length; i++) {
@@ -15835,14 +15834,15 @@ var AreaSeries = extendClass(Series, {
 					plotX = xAxis.translate(x);
 					plotY = yAxis.toPixels(y, true);
 					segment.push({
-						y: null,
-						plotX: plotX,
-						clientX: plotX,
-						plotY: plotY,
-						yBottom: plotY,
-						onMouseOver: noop
-					});
+	            y: null,
+	            plotX: plotX,
+	            clientX: plotX,
+	            plotY: plotY,
+	            yBottom: plotY,
+	            onMouseOver: noop
+	        });
 				}
+
 			});
 
 			if (segment.length) {
