@@ -11519,6 +11519,8 @@ Chart.prototype = {
 					axis.setScale();
 				});
 			}
+
+      chart.adjustTickAmounts();
 		}
 
 		chart.getMargins(); // #3098
@@ -11650,6 +11652,8 @@ Chart.prototype = {
 		each(optionsArray, function (axisOptions) {
 			axis = new Axis(chart, axisOptions);
 		});
+
+    chart.adjustTickAmounts();
 	},
 
 
@@ -12457,6 +12461,7 @@ Chart.prototype = {
 					axis.setTickInterval(true); // update to reflect the new margins
 				}
 			});
+    	chart.adjustTickAmounts();
 			chart.getMargins(); // second pass to check for new labels
 		}
 
@@ -21410,6 +21415,10 @@ Scroller.prototype = {
 				translateX: scrollerLeft,
 				translateY: mathRound(outlineTop + height)
 			});
+
+
+	    if (scrollerWidth < 0)//PO Shouldn't set a negative width    //salient code
+	        scrollerWidth = 0;
 
 			scrollbarTrack[verb]({
 				width: scrollerWidth
