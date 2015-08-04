@@ -7970,17 +7970,37 @@ Axis.prototype = {
 	},
 
 	renderUnsquish: function () {
-		var chart = this.chart,
-			renderer = chart.renderer,
+		var labelLength = 0,
+        ticks = this.ticks,
+      	tickPositions = this.tickPositions,
+        chart = this.chart,
+        cappedLabelLength = 0,
+        capPercentage = this.options.forceAxisLabelWidthCapPercentage ? this.options.forceAxisLabelWidthCapPercentage : this.options.forceAxisLabelWidth ? 0.6 : 0.33;//Cap percentage based on a configurable variable.
+
+
+
+    if (this.autoRotation || this.options.forceAxisLabelWidth) {//SALIENT PO moved this to force width based on label length
+        // Get the longest label length
+        each(tickPositions, function (tick) {
+            tick = ticks[tick];
+            if (tick && tick.labelLength > labelLength) {
+                labelLength = tick.labelLength;
+            }
+        });
+
+        cappedLabelLength = Math.min(labelLength, chart.chartWidth * capPercentage);
+    }
+
+    var renderer = chart.renderer,
 			tickPositions = this.tickPositions,
 			ticks = this.ticks,
 			labelOptions = this.options.labels,
 			horiz = this.horiz,
 			margin = chart.margin,
 			slotCount = this.categories ? tickPositions.length : tickPositions.length - 1,
-			slotWidth = this.slotWidth = (horiz && !labelOptions.step && !labelOptions.rotation &&
+			slotWidth = this.slotWidth = this.options.forceAxisLabelWidth ? cappedLabelLength : ((horiz && !labelOptions.step && !labelOptions.rotation &&
 				((this.staggerLines || 1) * chart.plotWidth) / slotCount) ||
-				(!horiz && ((margin[3] && (margin[3] - chart.spacing[3])) || chart.chartWidth * 0.33)), // #1580, #1931,
+				(!horiz && ((margin[3] && (margin[3] - chart.spacing[3])) || chart.chartWidth * capPercentage))), // #1580, #1931,
 			innerWidth = mathMax(1, mathRound(slotWidth - 2 * (labelOptions.padding || 5))),
 			attr = {},
 			labelMetrics = renderer.fontMetrics(labelOptions.style.fontSize, ticks[0] && ticks[0].label),
@@ -8000,12 +8020,12 @@ Axis.prototype = {
 		if (this.autoRotation) {
 
 			// Get the longest label length
-			each(tickPositions, function (tick) {
-				tick = ticks[tick];
-				if (tick && tick.labelLength > labelLength) {
-					labelLength = tick.labelLength;
-				}
-			});
+			//each(tickPositions, function (tick) {
+      //	tick = ticks[tick];
+      //	if (tick && tick.labelLength > labelLength) {
+      //		labelLength = tick.labelLength;
+      //	}
+      //});
 
 			// Apply rotation only if the label is too wide for the slot, and
 			// the label is wider than its height.
@@ -8045,12 +8065,18 @@ Axis.prototype = {
 		// Add ellipsis if the label length is significantly longer than ideal
 		if (attr.rotation) {
 			css = {
-				width: (labelLength > chart.chartHeight * 0.5 ? chart.chartHeight * 0.33 : chart.chartHeight) + PX
+				width: (labelLength > chart.chartHeight * 0.5 ? chart.chartHeight * capPercentage : chart.chartHeight) + PX
 			};
 			if (!textOverflowOption) {
 				css.textOverflow = 'ellipsis';
 			}
 		}
+    else if (this.options.forceAxisLabelWidth){
+        css = {
+            width: cappedLabelLength + PX,
+            textOverflow: 'ellipsis'
+        };
+    }
 
 		// Set the explicit or automatic label alignment
 		this.labelAlign = attr.align = labelOptions.align || this.autoLabelAlign(this.labelRotation);
@@ -21239,16 +21265,10 @@ Scroller.prototype = {
 			return;
 		}
 
-		scroller.navigatorLeft = navigatorLeft = pick(
-			xAxis.left,
-	    //chart.plotLeft + scrollbarHeight // in case of scrollbar only, without navigator     (Highcharts Old Code)
-			5/*chart.plotLeft*/ + scrollbarHeight // in case of scrollbar only, without navigator (Salient Custom Code)
-		);
-    //scroller.navigatorWidth = navigatorWidth = pick(xAxis.len, chart.plotWidth - 2 * scrollbarHeight); (Highcharts Old Code)
-	  scroller.navigatorWidth = navigatorWidth = pick(xAxis.len, (chart.chartWidth - 5) - 2 * scrollbarHeight); //(Salient Custom Code)
+		scroller.navigatorLeft = navigatorLeft = 5 + scrollbarHeight;
+    scroller.navigatorWidth = navigatorWidth = (chart.chartWidth - 10) - (2 * scrollbarHeight);
 		scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
-		scroller.scrollerWidth = scrollerWidth = scrollerWidth = navigatorWidth + 2 * scrollbarHeight;
-
+		scroller.scrollerWidth = scrollerWidth = mathMax(scrollerWidth = navigatorWidth + 2 * scrollbarHeight, 0);
 		// Set the scroller x axis extremes to reflect the total. The navigator extremes
 		// should always be the extremes of the union of all series in the chart as
 		// well as the navigator series.
@@ -21415,10 +21435,6 @@ Scroller.prototype = {
 				translateX: scrollerLeft,
 				translateY: mathRound(outlineTop + height)
 			});
-
-
-	    if (scrollerWidth < 0)//PO Shouldn't set a negative width    //salient code
-	        scrollerWidth = 0;
 
 			scrollbarTrack[verb]({
 				width: scrollerWidth
@@ -21784,8 +21800,7 @@ Scroller.prototype = {
 				translate: function (value, reverse) {
 					var axis = chart.xAxis[0],
 						ext = axis.getExtremes(),
-						//scrollTrackWidth = chart.plotWidth - 2 * scrollbarHeight, (Highcharts Old Code)
-						scrollTrackWidth = chart.chartWidth - 5 * scrollbarHeight,//(Salient Custom Code)
+						scrollTrackWidth = scroller.scrollerWidth - (2 * scrollbarHeight),
 						min = numExt('min', axis.options.min, ext.dataMin),
 						valueRange = numExt('max', axis.options.max, ext.dataMax) - min;
 
