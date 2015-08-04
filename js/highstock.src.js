@@ -21236,9 +21236,11 @@ Scroller.prototype = {
 
 		scroller.navigatorLeft = navigatorLeft = pick(
 			xAxis.left,
+	    //chart.plotLeft + scrollbarHeight // in case of scrollbar only, without navigator     (Highcharts Old Code)
 			5/*chart.plotLeft*/ + scrollbarHeight // in case of scrollbar only, without navigator (Salient Custom Code)
 		);
-		scroller.navigatorWidth = navigatorWidth = pick(xAxis.len, (chart.chartWidth - 5)/*chart.plotWidth*/ - 2 * scrollbarHeight); //(Salient Custom Code)
+    //scroller.navigatorWidth = navigatorWidth = pick(xAxis.len, chart.plotWidth - 2 * scrollbarHeight); (Highcharts Old Code)
+	  scroller.navigatorWidth = navigatorWidth = pick(xAxis.len, (chart.chartWidth - 5) - 2 * scrollbarHeight); //(Salient Custom Code)
 		scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
 		scroller.scrollerWidth = scrollerWidth = scrollerWidth = navigatorWidth + 2 * scrollbarHeight;
 
@@ -21774,7 +21776,7 @@ Scroller.prototype = {
 					var axis = chart.xAxis[0],
 						ext = axis.getExtremes(),
 						//scrollTrackWidth = chart.plotWidth - 2 * scrollbarHeight, (Highcharts Old Code)
-						scrollTrackWidth = (chart.chartWidth - 5)/*chart.plotWidth*/ - 2 * scrollbarHeight,//(Salient Custom Code)
+						scrollTrackWidth = chart.chartWidth - 5 * scrollbarHeight,//(Salient Custom Code)
 						min = numExt('min', axis.options.min, ext.dataMin),
 						valueRange = numExt('max', axis.options.max, ext.dataMax) - min;
 
