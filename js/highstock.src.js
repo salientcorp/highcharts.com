@@ -1668,7 +1668,8 @@ function getOptions() {
  */
 var rgbaRegEx = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]?(?:\.[0-9]+)?)\s*\)/,
 	hexRegEx = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
-	rgbRegEx = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/;
+	rgbRegEx = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/,
+  shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
 
 var Color = function (input) {
 	// declare variables
@@ -1702,6 +1703,12 @@ var Color = function (input) {
 					result = rgbRegEx.exec(input);
 					if (result) {
 						rgba = [pInt(result[1]), pInt(result[2]), pInt(result[3]), 1];
+					} else {
+				    // shorthand
+				    result = shorthandRegex.exec(input);
+				    if (result) {
+				        rgba = [pInt(result[1], 16), pInt(result[2], 16), pInt(result[3], 16), 1];
+				    }
 					}
 				}
 			}
@@ -1772,7 +1779,10 @@ var Color = function (input) {
 	}
 
 	// initialize: parse the input
-	init(input);
+	if (!input)
+	    rgba = [];//Don't bother parsing an undefined value.
+  else
+		init(input);
 
 	// public methods
 	return {
@@ -3384,6 +3394,18 @@ SVGRenderer.prototype = {
 	 * Returns white for dark colors and black for bright colors
 	 */
 	getContrast: function (color) {
+    if (color[0] === '#' && color.length === 4)
+    {
+        if (color === '#000')
+        {
+            return '#FFF';
+        }
+        else if (color === '#fff') {
+            return '#000';
+        }
+        color = color.substring(1, 7);
+        return (pInt(color, 16) > 0xffffff / 2) ? '#FFF' : '#000';
+    }
 		color = Color(color).rgba;
 		return color[0] + color[1] + color[2] > 384 ? '#000000' : '#FFFFFF';
 	},
