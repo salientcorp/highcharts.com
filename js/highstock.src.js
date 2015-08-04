@@ -12486,7 +12486,7 @@ Chart.prototype = {
 
 			chart.maxTicks = null; // reset for second pass
 			each(axes, function (axis) {
-				if ((axis.horiz && redoHorizontal) || (!axis.horiz && redoVertical)) {
+	    if ((axis.horiz && redoHorizontal) || (!axis.horiz && redoVertical) || chart.options.forceTickCalculations) {//SALIENT PO  forceTickCalculations on redraw with new series.
 					axis.setTickInterval(true); // update to reflect the new margins
 				}
 			});
@@ -12528,6 +12528,7 @@ Chart.prototype = {
 	correctTickAmounts: function()//SALIENT PO This is run after the tick amount calculations to trim any extra ticks.
   {
       var chart = this;
+      chart.options.forceTickCalculations = false;
 
       if (!chart.yAxis[0] || !chart.yAxis[0].tickPositions|| chart.yAxis[0].options.normalTickCalculations)// Don't correctTickAmounts when there are no ticks, dont correct them if the axis should do normal calculations          return;
 				return;
