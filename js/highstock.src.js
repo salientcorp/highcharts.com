@@ -13754,9 +13754,7 @@ Series.prototype = {
 
 					// Place the stack label
 					pointStack.setOffset(series.pointXOffset || 0, series.barW || 0);
-				} else {
-		        var wef = 1;
-		    }
+				}
 			}
 
 			// Set translated yBottom or remove it
@@ -15840,7 +15838,6 @@ var AreaSeries = extendClass(Series, {
 	            onMouseOver: noop
 	        });
 				}
-				else{var wf= 1}
 
 			});
 
