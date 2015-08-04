@@ -11546,6 +11546,8 @@ Chart.prototype = {
 					axis.setScale();
 				});
 			}
+			if (chart.correctTickAmounts)//SALIENT PO
+			    chart.correctTickAmounts();
 		}
 
 		chart.getMargins(); // #3098
@@ -12110,6 +12112,8 @@ Chart.prototype = {
 			axis.isDirty = true;
 			axis.setScale();
 		});
+		if (chart.correctTickAmounts)//SALIENT PO
+		    chart.correctTickAmounts();
 
 		// make sure non-cartesian series are also handled
 		each(chart.series, function (serie) {
@@ -12468,7 +12472,9 @@ Chart.prototype = {
 
 		// Get margins by pre-rendering axes
 		each(axes, function (axis) {
+	    axis.isPreRender = true;//SALIENT PO
 			axis.setScale();
+	    axis.isPreRender = false;
 		});
 		chart.getAxisMargins();
 
@@ -12486,6 +12492,8 @@ Chart.prototype = {
 			});
 			chart.getMargins(); // second pass to check for new labels
 		}
+		if (chart.correctTickAmounts)//SALIENT PO
+		    chart.correctTickAmounts();
 
 		// Draw the borders and backgrounds
 		chart.drawChartBox();
@@ -12516,6 +12524,42 @@ Chart.prototype = {
 		chart.hasRendered = true;
 
 	},
+
+	correctTickAmounts: function()//SALIENT PO This is run after the tick amount calculations to trim any extra ticks.
+  {
+      var chart = this;
+
+      if (!chart.yAxis[0].tickPositions)// Don't correctTickAmounts when there are no ticks
+          return;
+
+      var allhaveExtraMaxTicks = true;
+      var allhaveExtraMinTicks = true;
+
+      while ((allhaveExtraMaxTicks || allhaveExtraMinTicks) && chart.yAxis[0].tickPositions.length > 2) {//Run this cutter until there are no extra ticks
+
+          each(chart.yAxis, function (yAxis) {
+
+              if (yAxis.tickPositions[yAxis.tickPositions.length - 2] < yAxis.dataMax)//use second to last as the comparison
+                  allhaveExtraMaxTicks = false;
+
+              if (yAxis.tickPositions[1] > yAxis.dataMin)//use second tick as the comparison
+                  allhaveExtraMinTicks = false;
+          });
+
+          if(allhaveExtraMaxTicks)//If there are extra max ticks on all axis pop them
+              each(chart.yAxis, function (yAxis) {
+                  yAxis.tickPositions.pop();
+                  yAxis.max = yAxis.tickPositions[yAxis.tickPositions.length - 1];
+              });
+
+          if (allhaveExtraMinTicks)//If there are extra min ticks on all axis remove from the begining
+              each(chart.yAxis, function (yAxis) {
+                  yAxis.tickPositions.shift();
+                  yAxis.min = yAxis.tickPositions[0];
+              });
+      }
+
+  },
 
 	/**
 	 * Show chart credits based on config options
