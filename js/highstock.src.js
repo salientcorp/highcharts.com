@@ -1669,7 +1669,7 @@ function getOptions() {
 var rgbaRegEx = /rgba\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]?(?:\.[0-9]+)?)\s*\)/,
 	hexRegEx = /#([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
 	rgbRegEx = /rgb\(\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*,\s*([0-9]{1,3})\s*\)/,
-  shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i;
+  shorthandRegex = /^#?([a-f\d])([a-f\d])([a-f\d])$/i; //SALIENT PO Added this for short hand hex conversion
 
 var Color = function (input) {
 	// declare variables
@@ -1703,7 +1703,7 @@ var Color = function (input) {
 					result = rgbRegEx.exec(input);
 					if (result) {
 						rgba = [pInt(result[1]), pInt(result[2]), pInt(result[3]), 1];
-					} else {
+					} else {//SALIENT PO Added this for short hand hex conversion
 				    // shorthand
 				    result = shorthandRegex.exec(input);
 				    if (result) {
@@ -1780,7 +1780,7 @@ var Color = function (input) {
 
 	// initialize: parse the input
 	if (!input)
-	    rgba = [];//Don't bother parsing an undefined value.
+	    rgba = [];//SALIENT PO Don't bother parsing an undefined value.
   else
 		init(input);
 
@@ -3394,7 +3394,7 @@ SVGRenderer.prototype = {
 	 * Returns white for dark colors and black for bright colors
 	 */
 	getContrast: function (color) {
-    if (color[0] === '#' && color.length === 4)
+    if (color[0] === '#' && color.length === 4)//SALINET PO Added shorthand hex code contrast
     {
         if (color === '#000')
         {
@@ -7335,7 +7335,7 @@ Axis.prototype = {
 	 * Set the tick positions to round values and optionally extend the extremes
 	 * to the nearest tick
 	 */
-	setTickInterval: function (secondPass, skipTicks) {
+	setTickInterval: function (secondPass, skipTicks) {//SALIENT PO Added skipTicks to skip recursive calculations
 		var axis = this,
 			chart = axis.chart,
 			options = axis.options,
@@ -7486,7 +7486,7 @@ Axis.prototype = {
 			axis.tickInterval = axis.unsquish();
 		}
 
-		if(!skipTicks)//SALEINT PO can skip tick processing when doing our own.
+		if(!skipTicks)//SALIENT PO can skip tick processing when doing our own.
 			this.setTickPositions();
 	},
 
@@ -7970,8 +7970,8 @@ Axis.prototype = {
 		return newTickInterval;
 	},
 
-	renderUnsquish: function () {
-		var labelLength = 0,
+	renderUnsquish: function () {//SALIENT PO This function was completely rewritten since it was incorrect.
+			var labelLength = 0,
         ticks = this.ticks,
       	tickPositions = this.tickPositions,
         chart = this.chart,
@@ -11546,7 +11546,7 @@ Chart.prototype = {
 					axis.setScale();
 				});
 			}
-			if (chart.correctTickAmounts)//SALIENT PO
+			if (chart.correctTickAmounts)//SALIENT PO removes extra ticks
 			    chart.correctTickAmounts();
 		}
 
@@ -12112,8 +12112,8 @@ Chart.prototype = {
 			axis.isDirty = true;
 			axis.setScale();
 		});
-		if (chart.correctTickAmounts)//SALIENT PO
-		    chart.correctTickAmounts();
+		if (chart.correctTickAmounts)//SALIENT PO removes extra ticks
+			chart.correctTickAmounts();
 
 		// make sure non-cartesian series are also handled
 		each(chart.series, function (serie) {
@@ -12472,7 +12472,7 @@ Chart.prototype = {
 
 		// Get margins by pre-rendering axes
 		each(axes, function (axis) {
-	    axis.isPreRender = true;//SALIENT PO
+	    axis.isPreRender = true;//SALIENT PO This will skip our alignment calculations until later.
 			axis.setScale();
 	    axis.isPreRender = false;
 		});
@@ -12492,8 +12492,8 @@ Chart.prototype = {
 			});
 			chart.getMargins(); // second pass to check for new labels
 		}
-		if (chart.correctTickAmounts)//SALIENT PO
-		    chart.correctTickAmounts();
+		if (chart.correctTickAmounts)//SALIENT PO  removes extra ticks
+	    chart.correctTickAmounts();
 
 		// Draw the borders and backgrounds
 		chart.drawChartBox();
@@ -13808,8 +13808,7 @@ Series.prototype = {
         //PO - picks previous or next data point for getting stackings lowest y value
 				stackValues = pointStack.points[series.index + ',' + i] || pointStack.points[(series.index) + ',' + (i + 1)] || pointStack.points[(series.index) + ',' + (i - 1)] ||
 				              pointStack.points[(series.index + 1) + ',' + i] || pointStack.points[(series.index + 1) + ',' + (i + 1)] || pointStack.points[(series.index + 1) + ',' + (i - 1)];
-		    if (stackValues) //PO Skip stacking info for null points
-		    {
+		    if (stackValues) { //SALIENT PO Skip stacking info for null points
 					yBottom = stackValues[0];
 					yValue = stackValues[1];
 
@@ -15875,8 +15874,8 @@ var AreaSeries = extendClass(Series, {
 				return a - b;
 			});
 
-			each(keys, function (x, i) {
-				var y = 0,
+			each(keys, function (x, i) {//SALIENT PO Added Index
+					var y = 0,
 					stackPoint;
 
 				if (connectNulls && (!pointMap[x] || pointMap[x].y === null)) { // #1836
@@ -15889,7 +15888,8 @@ var AreaSeries = extendClass(Series, {
 				// There is no point for this X value in this series, so we
 				// insert a dummy point in order for the areas to be drawn
 				// correctly.
-				} else if (!(series.chart.skipFirst && i == 0 || series.chart.skipLast && i == series.chart.lastIndex)) { //PO added this value to not add first and last null points if desired. 					// Loop down the stack to find the series below this one that has
+				} else if (!(series.chart.skipFirst && i == 0 || series.chart.skipLast && i == series.chart.lastIndex)) { //SALIENT PO added this value to not add first and last null points if desired.
+					// Loop down the stack to find the series below this one that has
 					// a value (#1991)
 					for (i = series.index; i <= yAxis.series.length; i++) {
 						stackPoint = stack[x].points[i + ',' + x];
@@ -21306,6 +21306,7 @@ Scroller.prototype = {
 			return;
 		}
 
+		//SALIENT PM Using chartWidth instead of plotWidth and adding 5px paddding on right and left sides, so scollbar took up the width of the chart and no longer resized when the plot area changes.
 		scroller.navigatorLeft = navigatorLeft = 5 + scrollbarHeight;
     scroller.navigatorWidth = navigatorWidth = (chart.chartWidth - 10) - (2 * scrollbarHeight);
 		scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
@@ -21839,6 +21840,7 @@ Scroller.prototype = {
 		} else {
 			scroller.xAxis = xAxis = {
 				translate: function (value, reverse) {
+					//SALIENT PM Scroll width doesn't change anymore, so it's just the scroller width plus the two buttons and puts it in the chartWidth. 
 					var axis = chart.xAxis[0],
 						ext = axis.getExtremes(),
 						scrollTrackWidth = scroller.scrollerWidth - (2 * scrollbarHeight),
