@@ -13732,24 +13732,32 @@ Series.prototype = {
 			if (stacking && series.visible && stack && stack[xValue]) {
 
 				pointStack = stack[xValue];
-				stackValues = pointStack.points[series.index + ',' + i] || pointStack.points[series.index + ',' + (i - 1)] || pointStack.points[series.index + ',' + (i + 1)];//PO picks previous or next  data point for getting stackings lowest y value ;
-				yBottom = stackValues[0];
-				yValue = stackValues[1];
 
-				if (yBottom === stackThreshold) {
-					yBottom = pick(threshold, yAxis.min);
+        //PO - picks previous or next data point for getting stackings lowest y value
+				stackValues =
+            pointStack.points[series.index + ',' + i] ||
+            pointStack.points[series.index + ',' + (i - 1)] ||
+            pointStack.points[series.index + ',' + (i + 1)];
+
+		    if (stackValues)
+		    {
+					yBottom = stackValues[0];
+					yValue = stackValues[1];
+
+					if (yBottom === stackThreshold) {
+						yBottom = pick(threshold, yAxis.min);
+					}
+					if (yAxis.isLog && yBottom <= 0) { // #1200, #1232
+						yBottom = null;
+					}
+
+					point.total = point.stackTotal = pointStack.total;
+					point.percentage = pointStack.total && (point.y / pointStack.total * 100);
+					point.stackY = yValue;
+
+					// Place the stack label
+					pointStack.setOffset(series.pointXOffset || 0, series.barW || 0);
 				}
-				if (yAxis.isLog && yBottom <= 0) { // #1200, #1232
-					yBottom = null;
-				}
-
-				point.total = point.stackTotal = pointStack.total;
-				point.percentage = pointStack.total && (point.y / pointStack.total * 100);
-				point.stackY = yValue;
-
-				// Place the stack label
-				pointStack.setOffset(series.pointXOffset || 0, series.barW || 0);
-
 			}
 
 			// Set translated yBottom or remove it
