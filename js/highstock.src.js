@@ -7975,7 +7975,7 @@ Axis.prototype = {
       	tickPositions = this.tickPositions,
         chart = this.chart,
         cappedLabelLength = 0,
-        capPercentage = this.options.forceAxisLabelWidthCapPercentage ? this.options.forceAxisLabelWidthCapPercentage : this.options.forceAxisLabelWidth ? 0.6 : 0.33;//Cap percentage based on a configurable variable.
+        capPercentage = this.options.forceAxisLabelWidthCapPercentage ? this.options.forceAxisLabelWidthCapPercentage : this.options.forceAxisLabelWidth ? 0.6 : 0.33;//SALIENT PO Cap percentage based on a configurable variable.
 
 
 
@@ -11543,6 +11543,7 @@ Chart.prototype = {
 				// set axes scales
 				each(axes, function (axis) {
 					axis.setScale();
+			    axis.adjustTickAmount();
 				});
 			}
 
@@ -11677,6 +11678,7 @@ Chart.prototype = {
 
 		each(optionsArray, function (axisOptions) {
 			axis = new Axis(chart, axisOptions);
+	    axis.adjustTickAmount();
 		});
 
     chart.adjustTickAmounts();
@@ -12485,9 +12487,10 @@ Chart.prototype = {
 			each(axes, function (axis) {
 				if ((axis.horiz && redoHorizontal) || (!axis.horiz && redoVertical)) {
 					axis.setTickInterval(true); // update to reflect the new margins
+			    axis.adjustTickAmount();
 				}
 			});
-    	chart.adjustTickAmounts();
+    	//chart.adjustTickAmounts();
 			chart.getMargins(); // second pass to check for new labels
 		}
 
