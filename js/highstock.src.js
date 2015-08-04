@@ -12529,8 +12529,8 @@ Chart.prototype = {
   {
       var chart = this;
 
-      if (!chart.yAxis[0].tickPositions)// Don't correctTickAmounts when there are no ticks
-          return;
+      if (!chart.yAxis[0] || !chart.yAxis[0].tickPositions|| chart.yAxis[0].options.normalTickCalculations)// Don't correctTickAmounts when there are no ticks, dont correct them if the axis should do normal calculations          return;
+				return;
 
       var allhaveExtraMaxTicks = true;
       var allhaveExtraMinTicks = true;
