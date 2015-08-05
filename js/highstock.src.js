@@ -2879,7 +2879,7 @@ SVGElement.prototype = {
 		// IE9-11 doesn't handle visibilty:inherit well, so we remove the attribute instead (#2881, #3909)
 		if (value === 'inherit') {
 			element.removeAttribute(key);
-		} else {
+		} else {
 			element.setAttribute(key, value);
 		}
 	},
@@ -11546,8 +11546,6 @@ Chart.prototype = {
 			    axis.adjustTickAmount();
 				});
 			}
-
-      chart.adjustTickAmounts();
 		}
 
 		chart.getMargins(); // #3098
@@ -11680,8 +11678,6 @@ Chart.prototype = {
 			axis = new Axis(chart, axisOptions);
 	    axis.adjustTickAmount();
 		});
-
-    chart.adjustTickAmounts();
 	},
 
 
@@ -12490,7 +12486,6 @@ Chart.prototype = {
 			    axis.adjustTickAmount();
 				}
 			});
-    	//chart.adjustTickAmounts();
 			chart.getMargins(); // second pass to check for new labels
 		}
 
