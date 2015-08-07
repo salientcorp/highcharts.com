@@ -22082,6 +22082,70 @@ Scroller.prototype = {
 
 Highcharts.Scroller = Scroller;
 
+function VerticalScroller(chart)
+{
+    Scroller.bind(this, chart);
+    this.__proto__ = {
+        render: function(min, max, pxMin, pxMax)
+        {
+            var scroller = this,
+                chart = scroller.chart,
+                renderer = chart.renderer,
+                navigatorLeft,
+                navigatorWidth,
+                scrollerLeft,
+                scrollerWidth,
+                scrollbarGroup = scroller.scrollbarGroup,
+                navigatorGroup = scroller.navigatorGroup,
+                scrollbar = scroller.scrollbar,
+                xAxis = scroller.xAxis,
+                scrollbarTrack = scroller.scrollbarTrack,
+                scrollbarWidth = scroller.scrollbarWidth,
+                scrollbarEnabled = scroller.scrollbarEnabled,
+                navigatorOptions = scroller.navigatorOptions,
+                scrollbarOptions = scroller.scrollbarOptions,
+                scrollbarMinWidth = scrollbarOptions.minWidth,
+                height = scroller.height,
+                top = scroller.top,
+                navigatorEnabled = scroller.navigatorEnabled,
+                outlineWidth = navigatorOptions.outlineWidth,
+                halfOutline = outlineWidth / 2,
+                zoomedMin,
+                zoomedMax,
+                range,
+                scrX,
+                scrWidth,
+                scrollbarPad = 0,
+                outlineHeight = scroller.outlineHeight,
+                barBorderRadius = scrollbarOptions.barBorderRadius,
+                strokeWidth,
+                scrollbarStrokeWidth = scrollbarOptions.barBorderWidth,
+                centerBarX,
+                outlineTop = top + halfOutline,
+                verb,
+                unionExtremes;
+
+            // don't render the navigator until we have data (#486)
+            if (isNaN(min))
+            {
+                return;
+            }
+            //SALIENT PM Using chartWidth instead of plotWidth and adding 5px paddding on right and left sides, so scollbar took up the width of the chart and no longer resized when the plot area changes.
+            scroller.navigatorLeft = navigatorLeft = 5 + scrollbarWidth;
+            scroller.navigatorWidth = navigatorWidth = (chart.chartHeight - 10) - (2 * scrollbarWidth);
+            scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
+            scroller.scrollerWidth = scrollerWidth = mathMax(scrollerWidth = navigatorWidth + 2 * scrollbarHeight, 0);
+            if (scrollbarEnabled) {
+                debugger;
+            }
+        }
+    };
+};
+
+//VerticalScroller.prototype = {
+//};
+Highcharts.VerticalScroller = VerticalScroller;
+
 
 /**
  * For Stock charts, override selection zooming with some special features because
@@ -22131,9 +22195,14 @@ wrap(Chart.prototype, 'init', function (proceed, options, callback) {
 	addEvent(this, 'beforeRender', function () {
 		var options = this.options;
 		if (options.navigator.enabled || options.scrollbar.enabled) {
-			this.scroller = new Scroller(this);
+				this.scroller = new Scroller(this);
+				if (options.chart.inverted === true) {
+						debugger;
+						var verticalScroller = new VerticalScroller(this);
+						extend(this.scroller.__proto__, verticalScroller.__proto__);
+				}
 		}
-	});
+});
 
 	proceed.call(this, options, callback);
 
