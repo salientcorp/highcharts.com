@@ -21614,6 +21614,7 @@ Scroller.prototype = {
 				handleSensitivity = isTouchDevice ? 10 : 7,
 				left,
 				isOnNavigator;
+		    debugger;
 
 			if (chartY > top && chartY < top + height + scrollbarHeight) { // we're vertically inside the navigator
 				isOnNavigator = !scroller.scrollbarEnabled || chartY < top + height;
@@ -21656,7 +21657,6 @@ Scroller.prototype = {
 
 						// Click right scrollbar button
 						} else if (chartX > scrollerLeft + scrollerWidth - scrollbarHeight) {
-						    debugger;
 							left = zoomedMin + range * 0.2;
 
 						// Click on scrollbar track, shift the scrollbar by one range
@@ -22601,9 +22601,9 @@ VerticalScroller.prototype = {
                 top = verticalScroller.top,
                 scrollbarWidth = verticalScroller.scrollbarWidth,
                 scrollerLeft = verticalScroller.scrollerLeft,
-                scrollerWidth = verticalScroller.scrollerWidth,
+                scrollerWidth = verticalScroller.scrollbarWidth,
                 navigatorLeft = verticalScroller.navigatorLeft,
-                navigatorWidth = verticalScroller.navigatorWidth,
+                navigatorHeight = verticalScroller.navigatorHeight,
                 scrollbarPad = verticalScroller.scrollbarPad,
                 range = verticalScroller.range,
                 chartX = e.chartX,
@@ -22614,13 +22614,13 @@ VerticalScroller.prototype = {
                 handleSensitivity = isTouchDevice ? 10 : 7,
                 left,
                 isOnNavigator;
-
-            if (chartY > top && chartY < top + height + scrollbarWidth)
-            { // we're vertically inside the navigator
-                isOnNavigator = !verticalScroller.scrollbarEnabled || chartY < top + height;
+            //chartY > top && chartY < top + height + scrollbarHeight
+            if (chartX + scrollerWidth > scrollerLeft && chartX < scrollerLeft + height)
+            { // we're horizontally inside the navigator
+                isOnNavigator = !verticalScroller.scrollbarEnabled || chartX + scrollerWidth < scrollerLeft + height;
 
                 // grab the left handle
-                if (isOnNavigator && math.abs(chartX - zoomedMin - navigatorLeft) < handleSensitivity)
+                if (isOnNavigator && math.abs(chartY - zoomedMin - navigatorHeight) < handleSensitivity)
                 {
                     verticalScroller.grabbedLeft = true;
                     verticalScroller.otherHandlePos = zoomedMax;
@@ -22628,7 +22628,7 @@ VerticalScroller.prototype = {
                     chart.fixedRange = null;
 
                     // grab the right handle
-                } else if (isOnNavigator && math.abs(chartX - zoomedMax - navigatorLeft) < handleSensitivity)
+                } else if (isOnNavigator && math.abs(chartY - zoomedMax - navigatorHeight) < handleSensitivity)
                 {
                     verticalScroller.grabbedRight = true;
                     verticalScroller.otherHandlePos = zoomedMin;
@@ -22636,53 +22636,45 @@ VerticalScroller.prototype = {
                     chart.fixedRange = null;
 
                     // grab the zoomed range
-                } else if (chartX > navigatorLeft + zoomedMin - scrollbarPad && chartX < navigatorLeft + zoomedMax + scrollbarPad)
+                } else if (chartY > navigatorHeight + zoomedMin - scrollbarPad && chartY < navigatorHeight + zoomedMax + scrollbarPad)
                 {
-                    verticalScroller.grabbedCenter = chartX;
+                    verticalScroller.grabbedCenter = chartY;
                     verticalScroller.fixedWidth = range;
 
-                    dragOffset = chartX - zoomedMin;
+                    dragOffset = chartY - zoomedMin;
 
 
                     // shift the range by clicking on shaded areas, scrollbar track or scrollbar buttons
-                } else if (chartX > scrollerLeft && chartX < scrollerLeft + scrollerWidth)
+                } else if (chartY < top + scrollerWidth)
                 {
 
                     // Center around the clicked point
                     if (isOnNavigator)
                     {
-                        left = chartX - navigatorLeft - range / 2;
+                        left = chartY - navigatorHeight - range / 2;
 
                         // Click on scrollbar
                     } else
                     {
-
-                        // Click left scrollbar button
-                        if (chartX < navigatorLeft)
+                        debugger;
+                        if (chartY < top - scrollerWidth && chartY > scrollerWidth) { // Click on scrollbar track, shift the scrollbar by one range}
+                            left = chartY > zoomedMin ? // on the left
+                                zoomedMax :
+                                zoomedMin - range;
+                        }
+                        else if (chartY > top - scrollerWidth)// Click up scrollbar button
                         {
-                            //debugger;
                             left = zoomedMin + range * 0.2;
-
-                            // Click right scrollbar button
-                        } else if (chartX > scrollerLeft + scrollerWidth - scrollbarWidth)
-                        {
-                            //debugger;
+                        } else { // Click Down scrollbar button
                             left = zoomedMin - range * 0.2;
-
-                            // Click on scrollbar track, shift the scrollbar by one range
-                        } else
-                        {
-                            left = chartX < navigatorLeft + zoomedMin ? // on the left
-                                zoomedMin - range :
-                                zoomedMax;
                         }
                     }
                     if (left < 0)
                     {
                         left = 0;
-                    } else if (left + range >= navigatorWidth)
+                    } else if (left + range >= navigatorHeight - scrollbarWidth)
                     {
-                        left = navigatorWidth - range;
+                        left = navigatorHeight - range;
                         fixedMax = verticalScroller.getUnionExtremes().dataMax; // #2293, #3543
                     }
                     if (left !== zoomedMin)
