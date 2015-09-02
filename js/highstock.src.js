@@ -21161,7 +21161,6 @@ Scroller.prototype = {
 	 */
     drawHandle: function (x, index)
     {
-        debugger;
 		var scroller = this,
 			chart = scroller.chart,
 			renderer = chart.renderer,
@@ -22128,7 +22127,6 @@ VerticalScroller.prototype = {
 */
     drawHandle: function (x, index)
     {
-        debugger;
         var verticalScroller = this,
             chart = verticalScroller.chart,
             renderer = chart.renderer,
@@ -22284,16 +22282,18 @@ VerticalScroller.prototype = {
         {
             return;
         }
-        scrollbarWidth = 14;
-        if (height != 0)
-        {
-            debugger;
-        }
+        scrollbarWidth = isTouchDevice ? 20 : 14;
+
         //SALIENT PM Using chartWidth instead of plotWidth and adding 5px paddding on right and left sides, so scollbar took up the width of the chart and no longer resized when the plot area changes.
-        verticalScroller.navigatorLeft = navigatorLeft = 5 + chart.chartWidth;
-        verticalScroller.navigatorHeight = navigatorHeight = 25 //(chart.chartHeight - 10) - (2 * scrollbarWidth);
+        verticalScroller.navigatorLeft = navigatorLeft = 10 + chart.chartWidth;
+        verticalScroller.navigatorHeight = navigatorHeight = chart.chartHeight//(chart.chartWidth - 10) - (2 * scrollbarWidth);
         verticalScroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarWidth;
-        verticalScroller.scrollerWidth = scrollerWidth = verticalScroller.scrollbarWidth; //mathMax(scrollerWidth = navigatorHeight + 2 * scrollbarWidth, 0);
+        verticalScroller.scrollerHeight = mathMax(scrollerHeight = navigatorHeight + 2 * scrollbarWidth, 0);
+
+        //scroller.navigatorLeft = navigatorLeft = 5 + scrollbarHeight;
+        //scroller.navigatorWidth = navigatorWidth = (chart.chartWidth - 10) - (2 * scrollbarHeight);
+        //scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
+        //scroller.scrollerWidth = scrollerWidth = mathMax(scrollerWidth = navigatorWidth + 2 * scrollbarHeight, 0);
 
         // Set the verticalScroller x axis extremes to reflect the total. The navigator extremes
         // should always be the extremes of the union of all series in the chart as
@@ -22390,15 +22390,15 @@ VerticalScroller.prototype = {
                 }).add(scrollbarGroup);
 
                 // the scrollbar itself
-                debugger;
                 verticalScroller.scrollbar = scrollbar = renderer.rect()
                     .attr({
-                        y: -scrollbarStrokeWidth % 2 / 2,
+                        x: -scrollbarStrokeWidth % 2 / 2,
                         width: scrollbarWidth,
                         fill: scrollbarOptions.barBackgroundColor,
                         stroke: scrollbarOptions.barBorderColor,
                         'stroke-width': scrollbarStrokeWidth,
-                        r: barBorderRadius
+                        r: barBorderRadius,
+                        height: verticalScroller.scrollerHeight
                     })
                     .add(scrollbarGroup);
 
@@ -22489,8 +22489,8 @@ VerticalScroller.prototype = {
             }
             verticalScroller.scrollbarPad = scrollbarPad;
             scrollbar[verb]({
-                x: mathFloor(scrX) + (scrollbarStrokeWidth % 2 / 2),
-                width: scrWidth
+                y: mathFloor(scrX) + (scrollbarStrokeWidth % 2 / 2),
+                height: scrWidth
             });
 
             centerBarX = scrollbarWidth + zoomedMin + range / 2 - 0.5;
