@@ -21614,7 +21614,7 @@ Scroller.prototype = {
 				handleSensitivity = isTouchDevice ? 10 : 7,
 				left,
 				isOnNavigator;
-		    debugger;
+		    //debugger;
 
 			if (chartY > top && chartY < top + height + scrollbarHeight) { // we're vertically inside the navigator
 				isOnNavigator = !scroller.scrollbarEnabled || chartY < top + height;
@@ -22401,6 +22401,7 @@ VerticalScroller.prototype = {
                         height: verticalScroller.scrollerHeight
                     })
                     .add(scrollbarGroup);
+                verticalScroller.scrollbarHeight = verticalScroller.scrollbar.height;
 
                 verticalScroller.scrollbarRifles = renderer.path()
                     .attr({
@@ -22636,7 +22637,7 @@ VerticalScroller.prototype = {
                     chart.fixedRange = null;
 
                     // grab the zoomed range
-                } else if (chartY > navigatorHeight + zoomedMin - scrollbarPad && chartY < navigatorHeight + zoomedMax + scrollbarPad)
+                } else if (chartY > zoomedMin - scrollbarPad && chartY < zoomedMax + scrollbarPad)
                 {
                     verticalScroller.grabbedCenter = chartY;
                     verticalScroller.fixedWidth = range;
@@ -22656,16 +22657,15 @@ VerticalScroller.prototype = {
                         // Click on scrollbar
                     } else
                     {
-                        debugger;
                         if (chartY < top - scrollerWidth && chartY > scrollerWidth) { // Click on scrollbar track, shift the scrollbar by one range}
                             left = chartY > zoomedMin ? // on the left
                                 zoomedMax :
                                 zoomedMin - range;
                         }
-                        else if (chartY > top - scrollerWidth)// Click up scrollbar button
+                        else if (chartY > top - scrollerWidth)// Click down scrollbar button
                         {
                             left = zoomedMin + range * 0.2;
-                        } else { // Click Down scrollbar button
+                        } else { // Click up scrollbar button
                             left = zoomedMin - range * 0.2;
                         }
                     }
@@ -22700,13 +22700,12 @@ VerticalScroller.prototype = {
  */
         verticalScroller.mouseMoveHandler = function (e)
         {
-            var scrollbarWidth = verticalScroller.scrollbarWidth,
-                navigatorLeft = verticalScroller.navigatorLeft,
-                navigatorWidth = verticalScroller.navigatorWidth,
-                scrollerLeft = verticalScroller.scrollerLeft,
-                scrollerWidth = verticalScroller.scrollerWidth,
+            var scrollbarHeight = verticalScroller.zoomedMax - verticalScroller.zoomedMin,
+                navigatorHeight = verticalScroller.navigatorHeight,
+                top = verticalScroller.top,
+                scrollerHeight = verticalScroller.scrollerHeight,
                 range = verticalScroller.range,
-                chartX;
+                chartY;
 
             // In iOS, a mousemove event with e.pageX === 0 is fired when holding the finger
             // down in the center of the scrollbar. This should be ignored.
@@ -22714,43 +22713,43 @@ VerticalScroller.prototype = {
             {
 
                 e = chart.pointer.normalize(e);
-                chartX = e.chartX;
+                chartY = e.chartY;
 
                 // validation for handle dragging
-                if (chartX < navigatorLeft)
+                if (chartY > navigatorHeight)
                 {
-                    chartX = navigatorLeft;
-                } else if (chartX > scrollerLeft + scrollerWidth - scrollbarWidth)
+                    chartY = navigatorHeight;
+                } else if (chartY > top + scrollerHeight - scrollbarHeight)
                 {
-                    chartX = scrollerLeft + scrollerWidth - scrollbarWidth;
+                    chartY = top + scrollerHeight - scrollbarHeight;
                 }
 
                 // drag left handle
                 if (verticalScroller.grabbedLeft)
                 {
                     hasDragged = true;
-                    verticalScroller.render(0, 0, chartX - navigatorLeft, verticalScroller.otherHandlePos);
+                    verticalScroller.render(0, 0, chartY - navigatorLeft, verticalScroller.otherHandlePos);
 
                     // drag right handle
                 } else if (verticalScroller.grabbedRight)
                 {
                     hasDragged = true;
-                    verticalScroller.render(0, 0, verticalScroller.otherHandlePos, chartX - navigatorLeft);
+                    verticalScroller.render(0, 0, verticalScroller.otherHandlePos, chartY - navigatorLeft);
 
                     // drag scrollbar or open area in navigator
                 } else if (verticalScroller.grabbedCenter)
                 {
 
                     hasDragged = true;
-                    if (chartX < dragOffset)
+                    if (chartY < dragOffset)
                     { // outside left
-                        chartX = dragOffset;
-                    } else if (chartX > navigatorWidth + dragOffset - range)
+                        chartY = dragOffset;
+                    } else if (chartY > navigatorHeight + dragOffset - range)
                     { // outside right
-                        chartX = navigatorWidth + dragOffset - range;
+                        chartY = navigatorHeight + dragOffset - range;
                     }
 
-                    verticalScroller.render(0, 0, chartX - dragOffset, chartX - dragOffset + range);
+                    verticalScroller.render(0, 0, chartY - dragOffset, chartY - dragOffset + range);
 
                 }
                 if (hasDragged && verticalScroller.scrollbarOptions.liveRedraw)
@@ -22771,6 +22770,7 @@ VerticalScroller.prototype = {
             var ext,
                 fixedMin,
                 fixedMax;
+            //debugger;
 
             if (hasDragged)
             {
