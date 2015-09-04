@@ -22158,13 +22158,13 @@ VerticalScroller.prototype = {
             // the rifles
             tempElem = renderer.path([
                     'M',
-                    -1.5, 4,
+                    4, -1.5,
                     'L',
-                    -1.5, 12,
+                    12, -1.5,
                     'M',
-                    0.5, 4,
+                    4, 0.5,
                     'L',
-                    0.5, 12
+                    12, 0.5
             ]).attr(attr)
                 .add(handles[index]);
             elementsToDestroy.push(tempElem);
@@ -22273,7 +22273,7 @@ VerticalScroller.prototype = {
             barBorderRadius = scrollbarOptions.barBorderRadius,
             strokeWidth,
             scrollbarStrokeWidth = scrollbarOptions.barBorderWidth,
-            centerBarX,
+            centerBarY,
             outlineTop = top + halfOutline,
             verb,
             unionExtremes;
@@ -22290,17 +22290,13 @@ VerticalScroller.prototype = {
         verticalScroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarWidth;
         verticalScroller.scrollerHeight = mathMax(scrollerHeight = navigatorHeight + 2 * scrollbarWidth, 0);
 
-        //scroller.navigatorLeft = navigatorLeft = 5 + scrollbarHeight;
-        //scroller.navigatorWidth = navigatorWidth = (chart.chartWidth - 10) - (2 * scrollbarHeight);
-        //scroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarHeight;
-        //scroller.scrollerWidth = scrollerWidth = mathMax(scrollerWidth = navigatorWidth + 2 * scrollbarHeight, 0);
-
         // Set the verticalScroller x axis extremes to reflect the total. The navigator extremes
         // should always be the extremes of the union of all series in the chart as
         // well as the navigator series.
         if (xAxis.getExtremes)
         {
             unionExtremes = verticalScroller.getUnionExtremes(true);
+            debugger;
 
             if (unionExtremes && (unionExtremes.dataMin !== xAxis.min || unionExtremes.dataMax !== xAxis.max))
             {
@@ -22494,7 +22490,7 @@ VerticalScroller.prototype = {
                 height: scrWidth
             });
 
-            centerBarX = scrollbarWidth + zoomedMin + range / 2 - 0.5;
+            centerBarY = scrollbarWidth + zoomedMin + range / 2 - 0.5;
 
             verticalScroller.scrollbarRifles
                 .attr({
@@ -22502,17 +22498,17 @@ VerticalScroller.prototype = {
                 })[verb]({
                     d: [
                         M,
-                        centerBarX - 3, scrollbarWidth / 4,
+                        scrollbarWidth / 4, centerBarY - 3,
                         L,
-                        centerBarX - 3, 2 * scrollbarWidth / 3,
+                        2 * scrollbarWidth / 3, centerBarY - 3,
                         M,
-                        centerBarX, scrollbarWidth / 4,
+                        scrollbarWidth / 4, centerBarY,
                         L,
-                        centerBarX, 2 * scrollbarWidth / 3,
+                        2 * scrollbarWidth / 3, centerBarY,
                         M,
-                        centerBarX + 3, scrollbarWidth / 4,
+                        scrollbarWidth / 4, centerBarY + 3,
                         L,
-                        centerBarX + 3, 2 * scrollbarWidth / 3
+                        2 * scrollbarWidth / 3, centerBarY + 3
                     ]
                 });
         }
@@ -22742,11 +22738,11 @@ VerticalScroller.prototype = {
 
                     hasDragged = true;
                     if (chartY < dragOffset)
-                    { // outside left
+                    { // outside top
                         chartY = dragOffset;
-                    } else if (chartY > navigatorHeight + dragOffset - range)
-                    { // outside right
-                        chartY = navigatorHeight + dragOffset - range;
+                    } else if (chartY + (2 * verticalScroller.scrollbarWidth) > navigatorHeight + dragOffset - range)
+                    { // outside bottom
+                        chartY = navigatorHeight + dragOffset - range - (2 * verticalScroller.scrollbarWidth);
                     }
 
                     verticalScroller.render(0, 0, chartY - dragOffset, chartY - dragOffset + range);
