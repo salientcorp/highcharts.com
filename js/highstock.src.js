@@ -22633,7 +22633,7 @@ VerticalScroller.prototype = {
                     chart.fixedRange = null;
 
                     // grab the zoomed range
-                } else if (chartY > zoomedMin - scrollbarPad && chartY < zoomedMax + scrollbarPad)
+                } else if (chartY - scrollbarWidth > zoomedMin - scrollbarPad && chartY - scrollbarWidth < zoomedMax + scrollbarPad)
                 {
                     verticalScroller.grabbedCenter = chartY;
                     verticalScroller.fixedWidth = range;
@@ -22665,10 +22665,11 @@ VerticalScroller.prototype = {
                             left = zoomedMin - range * 0.2;
                         }
                     }
+                    debugger
                     if (left < 0)
                     {
                         left = 0;
-                    } else if (left + range >= navigatorHeight - scrollbarWidth)
+                    } else if (left + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)//left + range >= navigatorWidth
                     {
                         left = navigatorHeight - range;
                         fixedMax = verticalScroller.getUnionExtremes().dataMax; // #2293, #3543
@@ -22733,9 +22734,8 @@ VerticalScroller.prototype = {
                     verticalScroller.render(0, 0, verticalScroller.otherHandlePos, chartY - navigatorLeft);
 
                     // drag scrollbar or open area in navigator
-                } else if (verticalScroller.grabbedCenter)
-                {
-
+                } else if (verticalScroller.grabbedCenter) {
+                    debugger;
                     hasDragged = true;
                     if (chartY < dragOffset)
                     { // outside top
