@@ -21614,7 +21614,6 @@ Scroller.prototype = {
 				handleSensitivity = isTouchDevice ? 10 : 7,
 				left,
 				isOnNavigator;
-		    //debugger;
 
 			if (chartY > top && chartY < top + height + scrollbarHeight) { // we're vertically inside the navigator
 				isOnNavigator = !scroller.scrollbarEnabled || chartY < top + height;
@@ -22296,7 +22295,6 @@ VerticalScroller.prototype = {
         if (xAxis.getExtremes)
         {
             unionExtremes = verticalScroller.getUnionExtremes(true);
-            debugger;
 
             if (unionExtremes && (unionExtremes.dataMin !== xAxis.min || unionExtremes.dataMax !== xAxis.max))
             {
@@ -22599,7 +22597,6 @@ VerticalScroller.prototype = {
                 scrollbarWidth = verticalScroller.scrollbarWidth,
                 scrollerLeft = verticalScroller.scrollerLeft,
                 scrollerWidth = verticalScroller.scrollbarWidth,
-                navigatorLeft = verticalScroller.navigatorLeft,
                 navigatorHeight = verticalScroller.navigatorHeight,
                 scrollbarPad = verticalScroller.scrollbarPad,
                 range = verticalScroller.range,
@@ -22653,8 +22650,9 @@ VerticalScroller.prototype = {
                         // Click on scrollbar
                     } else
                     {
-                        if (chartY < top - scrollerWidth && chartY > scrollerWidth) { // Click on scrollbar track, shift the scrollbar by one range}
-                            left = chartY > zoomedMin ? // on the left
+                        if (chartY < top - scrollerWidth && chartY > scrollerWidth)
+                        { // Click on scrollbar track, shift the scrollbar by one range}
+                            left = chartY > zoomedMin ? // clicked under the scrollbar
                                 zoomedMax :
                                 zoomedMin - range;
                         }
@@ -22665,13 +22663,12 @@ VerticalScroller.prototype = {
                             left = zoomedMin - range * 0.2;
                         }
                     }
-                    debugger
                     if (left < 0)
                     {
                         left = 0;
-                    } else if (left + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)//left + range >= navigatorWidth
+                    } else if (left + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)
                     {
-                        left = navigatorHeight - range;
+                        left = navigatorHeight - range - 2 * scrollbarWidth;
                         fixedMax = verticalScroller.getUnionExtremes().dataMax; // #2293, #3543
                     }
                     if (left !== zoomedMin)
@@ -22735,7 +22732,6 @@ VerticalScroller.prototype = {
 
                     // drag scrollbar or open area in navigator
                 } else if (verticalScroller.grabbedCenter) {
-                    debugger;
                     hasDragged = true;
                     if (chartY < dragOffset)
                     { // outside top
@@ -22766,7 +22762,6 @@ VerticalScroller.prototype = {
             var ext,
                 fixedMin,
                 fixedMax;
-            //debugger;
 
             if (hasDragged)
             {
@@ -22868,7 +22863,6 @@ VerticalScroller.prototype = {
             verticalScroller.xAxis = xAxis = {
                 translate: function (value, reverse)
                 {
-                    //debugger;
                     //SALIENT PM Scroll width doesn't change anymore, so it's just the verticalScroller width plus the two buttons and puts it in the chartWidth.
                     var axis = chart.xAxis[0],
                         ext = axis.getExtremes(),
