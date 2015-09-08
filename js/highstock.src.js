@@ -21133,6 +21133,11 @@ function Scroller(chart) {
 		height = navigatorEnabled ? navigatorOptions.height : 0,
 		scrollbarHeight = scrollbarEnabled ? scrollbarOptions.height : 0;
 
+	this.addEvents = Highcharts.ParentScroller.addEvents;
+	this.removeEvents = Highcharts.ParentScroller.removeEvents;
+	this.getUnionExtremes = Highcharts.ParentScroller.getUnionExtremes;
+	this.setBaseSeries = Highcharts.ParentScroller.setBaseSeries;
+	this.addBaseSeries = Highcharts.ParentScroller.addBaseSeries;
 
 	this.handles = [];
 	this.scrollbarButtons = [];
@@ -21528,53 +21533,6 @@ Scroller.prototype = {
 	},
 
 	/**
-	 * Set up the mouse and touch events for the navigator and scrollbar
-	 */
-	addEvents: function () {
-		var container = this.chart.container,
-			mouseDownHandler = this.mouseDownHandler,
-			mouseMoveHandler = this.mouseMoveHandler,
-			mouseUpHandler = this.mouseUpHandler,
-			_events;
-
-		// Mouse events
-		_events = [
-			[container, 'mousedown', mouseDownHandler],
-			[container, 'mousemove', mouseMoveHandler],
-			[document, 'mouseup', mouseUpHandler]
-		];
-
-		// Touch events
-		if (hasTouch) {
-			_events.push(
-				[container, 'touchstart', mouseDownHandler],
-				[container, 'touchmove', mouseMoveHandler],
-				[document, 'touchend', mouseUpHandler]
-			);
-		}
-
-		// Add them all
-		each(_events, function (args) {
-			addEvent.apply(null, args);
-		});
-		this._events = _events;
-	},
-
-	/**
-	 * Removes the event handlers attached previously with addEvents.
-	 */
-	removeEvents: function () {
-
-		each(this._events, function (args) {
-			removeEvent.apply(null, args);
-		});
-		this._events = UNDEFINED;
-		if (this.navigatorEnabled && this.baseSeries) {
-			removeEvent(this.baseSeries, 'updatedData', this.updatedDataHandler);
-		}
-	},
-
-	/**
 	 * Initiate the Scroller object
 	 */
 	init: function () {
@@ -21892,108 +21850,6 @@ Scroller.prototype = {
 		scroller.addEvents();
 	},
 
-	/**
-	 * Get the union data extremes of the chart - the outer data extremes of the base
-	 * X axis and the navigator axis.
-	 */
-	getUnionExtremes: function (returnFalseOnNoBaseSeries) {
-		var baseAxis = this.chart.xAxis[0],
-			navAxis = this.xAxis,
-			navAxisOptions = navAxis.options,
-			baseAxisOptions = baseAxis.options,
-			ret;
-
-		if (!returnFalseOnNoBaseSeries || baseAxis.dataMin !== null) {
-			ret = {
-				dataMin: pick( // #4053
-					navAxisOptions && navAxisOptions.min,
-					numExt(
-						'min',
-						baseAxisOptions.min,
-						baseAxis.dataMin,
-						navAxis.dataMin
-					)
-				),
-				dataMax: pick(
-					navAxisOptions && navAxisOptions.max,
-					numExt(
-						'max',
-						baseAxisOptions.max,
-						baseAxis.dataMax,
-						navAxis.dataMax
-					)
-				)
-			};
-		}
-		return ret;
-	},
-
-	/**
-	 * Set the base series. With a bit of modification we should be able to make
-	 * this an API method to be called from the outside
-	 */
-	setBaseSeries: function (baseSeriesOption) {
-		var chart = this.chart;
-
-		baseSeriesOption = baseSeriesOption || chart.options.navigator.baseSeries;
-
-		// If we're resetting, remove the existing series
-		if (this.series) {
-			this.series.remove();
-		}
-
-		// Set the new base series
-		this.baseSeries = chart.series[baseSeriesOption] ||
-			(typeof baseSeriesOption === 'string' && chart.get(baseSeriesOption)) ||
-			chart.series[0];
-
-		// When run after render, this.xAxis already exists
-		if (this.xAxis) {
-			this.addBaseSeries();
-		}
-	},
-
-	addBaseSeries: function () {
-		var baseSeries = this.baseSeries,
-			baseOptions = baseSeries ? baseSeries.options : {},
-			baseData = baseOptions.data,
-			mergedNavSeriesOptions,
-			navigatorSeriesOptions = this.navigatorOptions.series,
-			navigatorData;
-
-		// remove it to prevent merging one by one
-		navigatorData = navigatorSeriesOptions.data;
-		this.hasNavigatorData = !!navigatorData;
-
-		// Merge the series options
-		mergedNavSeriesOptions = merge(baseOptions, navigatorSeriesOptions, {
-			enableMouseTracking: false,
-			group: 'nav', // for columns
-			padXAxis: false,
-			xAxis: 'navigator-x-axis',
-			yAxis: 'navigator-y-axis',
-			name: 'Navigator',
-			showInLegend: false,
-			isInternal: true,
-			visible: true
-		});
-
-		// set the data back
-		mergedNavSeriesOptions.data = navigatorData || baseData;
-
-		// add the series
-		this.series = this.chart.initSeries(mergedNavSeriesOptions);
-
-		// Respond to updated data in the base series.
-		// Abort if lazy-loading data from the server.
-		if (baseSeries && this.navigatorOptions.adaptToUpdatedData !== false) {
-			addEvent(baseSeries, 'updatedData', this.updatedDataHandler);
-			// Survive Series.update()
-			baseSeries.userOptions.events = extend(baseSeries.userOptions.event, { updatedData: this.updatedDataHandler });
-
-		}
-	},
-
 	updatedDataHandler: function () {
 		var scroller = this.chart.scroller,
 			baseSeries = scroller.baseSeries,
@@ -22098,6 +21954,12 @@ function VerticalScroller(chart)
         scrollbarEnabled = scrollbarOptions.enabled,
         height = navigatorEnabled ? navigatorOptions.height : 0,
         scrollbarWidth = scrollbarEnabled ? scrollbarOptions.height : 0;
+
+    this.addEvents = Highcharts.ParentScroller.addEvents;
+    this.removeEvents = Highcharts.ParentScroller.removeEvents;
+    this.getUnionExtremes = Highcharts.ParentScroller.getUnionExtremes;
+    this.setBaseSeries = Highcharts.ParentScroller.setBaseSeries;
+    this.addBaseSeries = Highcharts.ParentScroller.addBaseSeries;
 
     this.handles = [];
     this.scrollbarButtons = [];
@@ -22516,58 +22378,6 @@ VerticalScroller.prototype = {
     },
 
     /**
-* Set up the mouse and touch events for the navigator and scrollbar
-*/
-    addEvents: function ()
-    {
-        var container = this.chart.container,
-            mouseDownHandler = this.mouseDownHandler,
-            mouseMoveHandler = this.mouseMoveHandler,
-            mouseUpHandler = this.mouseUpHandler,
-            _events;
-
-        // Mouse events
-        _events = [
-            [container, 'mousedown', mouseDownHandler],
-            [container, 'mousemove', mouseMoveHandler],
-            [document, 'mouseup', mouseUpHandler]
-        ];
-
-        // Touch events
-        if (hasTouch)
-        {
-            _events.push(
-                [container, 'touchstart', mouseDownHandler],
-                [container, 'touchmove', mouseMoveHandler],
-                [document, 'touchend', mouseUpHandler]
-            );
-        }
-
-        // Add them all
-        each(_events, function (args)
-        {
-            addEvent.apply(null, args);
-        });
-        this._events = _events;
-    },
-
-    /**
-* Removes the event handlers attached previously with addEvents.
-*/
-    removeEvents: function ()
-    {
-        each(this._events, function (args)
-        {
-            removeEvent.apply(null, args);
-        });
-        this._events = UNDEFINED;
-        if (this.navigatorEnabled && this.baseSeries)
-        {
-            removeEvent(this.baseSeries, 'updatedData', this.updatedDataHandler);
-        }
-    },
-
-    /**
 * Initiate the Scroller object
 */
     init: function ()
@@ -22913,115 +22723,6 @@ VerticalScroller.prototype = {
         verticalScroller.addEvents();
     },
 
-    /**
-* Get the union data extremes of the chart - the outer data extremes of the base
-* X axis and the navigator axis.
-*/
-    getUnionExtremes: function (returnFalseOnNoBaseSeries)
-    {
-        var baseAxis = this.chart.xAxis[0],
-            navAxis = this.xAxis,
-            navAxisOptions = navAxis.options,
-            baseAxisOptions = baseAxis.options,
-            ret;
-
-        if (!returnFalseOnNoBaseSeries || baseAxis.dataMin !== null)
-        {
-            ret = {
-                dataMin: pick( // #4053
-                    navAxisOptions && navAxisOptions.min,
-                    numExt(
-                        'min',
-                        baseAxisOptions.min,
-                        baseAxis.dataMin,
-                        navAxis.dataMin
-                    )
-                ),
-                dataMax: pick(
-                    navAxisOptions && navAxisOptions.max,
-                    numExt(
-                        'max',
-                        baseAxisOptions.max,
-                        baseAxis.dataMax,
-                        navAxis.dataMax
-                    )
-                )
-            };
-        }
-        return ret;
-    },
-
-    /**
-* Set the base series. With a bit of modification we should be able to make
-* this an API method to be called from the outside
-*/
-    setBaseSeries: function (baseSeriesOption)
-    {
-        var chart = this.chart;
-
-        baseSeriesOption = baseSeriesOption || chart.options.navigator.baseSeries;
-
-        // If we're resetting, remove the existing series
-        if (this.series)
-        {
-            this.series.remove();
-        }
-
-        // Set the new base series
-        this.baseSeries = chart.series[baseSeriesOption] ||
-            (typeof baseSeriesOption === 'string' && chart.get(baseSeriesOption)) ||
-            chart.series[0];
-
-        // When run after render, this.xAxis already exists
-        if (this.xAxis)
-        {
-            this.addBaseSeries();
-        }
-    },
-
-    addBaseSeries: function ()
-    {
-        var baseSeries = this.baseSeries,
-            baseOptions = baseSeries ? baseSeries.options : {},
-            baseData = baseOptions.data,
-            mergedNavSeriesOptions,
-            navigatorSeriesOptions = this.navigatorOptions.series,
-            navigatorData;
-
-        // remove it to prevent merging one by one
-        navigatorData = navigatorSeriesOptions.data;
-        this.hasNavigatorData = !!navigatorData;
-
-        // Merge the series options
-        mergedNavSeriesOptions = merge(baseOptions, navigatorSeriesOptions, {
-            enableMouseTracking: false,
-            group: 'nav', // for columns
-            padXAxis: false,
-            xAxis: 'navigator-x-axis',
-            yAxis: 'navigator-y-axis',
-            name: 'Navigator',
-            showInLegend: false,
-            isInternal: true,
-            visible: true
-        });
-
-        // set the data back
-        mergedNavSeriesOptions.data = navigatorData || baseData;
-
-        // add the series
-        this.series = this.chart.initSeries(mergedNavSeriesOptions);
-
-        // Respond to updated data in the base series.
-        // Abort if lazy-loading data from the server.
-        if (baseSeries && this.navigatorOptions.adaptToUpdatedData !== false)
-        {
-            addEvent(baseSeries, 'updatedData', this.updatedDataHandler);
-            // Survive Series.update()
-            baseSeries.userOptions.events = extend(baseSeries.userOptions.event, { updatedData: this.updatedDataHandler });
-
-        }
-    },
-
     updatedDataHandler: function ()
     {
         var verticalScroller = this.chart.verticalScroller,
@@ -23127,6 +22828,158 @@ VerticalScroller.prototype = {
 
 
 Highcharts.VerticalScroller = VerticalScroller;
+
+Highcharts.ParentScroller = {
+        /**
+	 * Set up the mouse and touch events for the navigator and scrollbar
+	 */
+        addEvents: function()
+        {
+            var container = this.chart.container,
+                mouseDownHandler = this.mouseDownHandler,
+                mouseMoveHandler = this.mouseMoveHandler,
+                mouseUpHandler = this.mouseUpHandler,
+                _events;
+
+            // Mouse events
+            _events = [
+                [container, 'mousedown', mouseDownHandler],
+                [container, 'mousemove', mouseMoveHandler],
+                [document, 'mouseup', mouseUpHandler]
+            ];
+
+            // Touch events
+            if (hasTouch) {
+                _events.push(
+                    [container, 'touchstart', mouseDownHandler],
+                    [container, 'touchmove', mouseMoveHandler],
+                    [document, 'touchend', mouseUpHandler]
+                );
+            }
+
+            // Add them all
+            each(_events, function(args) {
+                addEvent.apply(null, args);
+            });
+            this._events = _events;
+        },
+        /**
+	 * Removes the event handlers attached previously with addEvents.
+	 */
+        removeEvents: function()
+        {
+            each(this._events, function(args) {
+                removeEvent.apply(null, args);
+            });
+            this._events = UNDEFINED;
+            if (this.navigatorEnabled && this.baseSeries) {
+                removeEvent(this.baseSeries, 'updatedData', this.updatedDataHandler);
+            }
+        },
+        /**
+	 * Get the union data extremes of the chart - the outer data extremes of the base
+	 * X axis and the navigator axis.
+	 */
+        getUnionExtremes: function(returnFalseOnNoBaseSeries)
+        {
+            var baseAxis = this.chart.xAxis[0],
+                navAxis = this.xAxis,
+                navAxisOptions = navAxis.options,
+                baseAxisOptions = baseAxis.options,
+                ret;
+
+            if (!returnFalseOnNoBaseSeries || baseAxis.dataMin !== null) {
+                ret = {
+                    dataMin: pick( // #4053
+                        navAxisOptions && navAxisOptions.min,
+                        numExt(
+                            'min',
+                            baseAxisOptions.min,
+                            baseAxis.dataMin,
+                            navAxis.dataMin
+                        )
+                    ),
+                    dataMax: pick(
+                        navAxisOptions && navAxisOptions.max,
+                        numExt(
+                            'max',
+                            baseAxisOptions.max,
+                            baseAxis.dataMax,
+                            navAxis.dataMax
+                        )
+                    )
+                };
+            }
+            return ret;
+        },
+        /**
+	 * Set the base series. With a bit of modification we should be able to make
+	 * this an API method to be called from the outside
+	 */
+        setBaseSeries: function(baseSeriesOption)
+        {
+            var chart = this.chart;
+
+            baseSeriesOption = baseSeriesOption || chart.options.navigator.baseSeries;
+
+            // If we're resetting, remove the existing series
+            if (this.series) {
+                this.series.remove();
+            }
+
+            // Set the new base series
+            this.baseSeries = chart.series[baseSeriesOption] ||
+                (typeof baseSeriesOption === 'string' && chart.get(baseSeriesOption)) ||
+                chart.series[0];
+
+            // When run after render, this.xAxis already exists
+            if (this.xAxis) {
+                this.addBaseSeries();
+            }
+        },
+
+        addBaseSeries: function()
+        {
+            var baseSeries = this.baseSeries,
+                baseOptions = baseSeries ? baseSeries.options : {},
+                baseData = baseOptions.data,
+                mergedNavSeriesOptions,
+                navigatorSeriesOptions = this.navigatorOptions.series,
+                navigatorData;
+
+            // remove it to prevent merging one by one
+            navigatorData = navigatorSeriesOptions.data;
+            this.hasNavigatorData = !!navigatorData;
+
+            // Merge the series options
+            mergedNavSeriesOptions = merge(baseOptions, navigatorSeriesOptions, {
+                enableMouseTracking: false,
+                group: 'nav', // for columns
+                padXAxis: false,
+                xAxis: 'navigator-x-axis',
+                yAxis: 'navigator-y-axis',
+                name: 'Navigator',
+                showInLegend: false,
+                isInternal: true,
+                visible: true
+            });
+
+            // set the data back
+            mergedNavSeriesOptions.data = navigatorData || baseData;
+
+            // add the series
+            this.series = this.chart.initSeries(mergedNavSeriesOptions);
+
+            // Respond to updated data in the base series.
+            // Abort if lazy-loading data from the server.
+            if (baseSeries && this.navigatorOptions.adaptToUpdatedData !== false) {
+                addEvent(baseSeries, 'updatedData', this.updatedDataHandler);
+                // Survive Series.update()
+                baseSeries.userOptions.events = extend(baseSeries.userOptions.event, { updatedData: this.updatedDataHandler });
+
+            }
+        }
+    };
 
 
 /**
