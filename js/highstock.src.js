@@ -22236,8 +22236,8 @@ VerticalScroller.prototype = {
                 // the scrollbar track
                 strokeWidth = scrollbarOptions.trackBorderWidth;
                 verticalScroller.scrollbarTrack = scrollbarTrack = renderer.rect().attr({
-                    x: 0,
-                    y: -strokeWidth % 2 / 2,
+                    x: -strokeWidth % 2 / 2,
+                    y: 0,
                     fill: scrollbarOptions.trackBackgroundColor,
                     stroke: scrollbarOptions.trackBorderColor,
                     'stroke-width': strokeWidth,
