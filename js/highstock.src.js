@@ -22648,9 +22648,8 @@ VerticalScroller.prototype = {
                         topOfRange = chartY - navigatorHeight - range / 2;
 
                         // Click on scrollbar
-                    } else
-                    {
-                        if (chartY < top + scrollerWidth && chartY > scrollerWidth)
+                    } else {
+                        if (chartY < top + (2 * verticalScroller.scrollbarOptions.buttonBorderWidth) && chartY > scrollerWidth)
                         { // Click on scrollbar track, shift the scrollbar by one range
                             topOfRange = chartY > zoomedMin + scrollerWidth ? // clicked under the scrollbar
                                 zoomedMax :
@@ -22800,8 +22799,8 @@ VerticalScroller.prototype = {
         var xAxisIndex = chart.xAxis.length,
             yAxisIndex = chart.yAxis.length;
 
-        // make to the right of the chart
-        chart.extraRightMargin = verticalScroller.outlineHeight + navigatorOptions.margin;
+        // make room to the right of the chart
+        chart.extraRightMargin = (verticalScroller.outlineHeight * 3) +  navigatorOptions.margin;
 
         if (verticalScroller.navigatorEnabled)
         {
