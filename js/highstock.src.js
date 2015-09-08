@@ -7493,8 +7493,8 @@ Axis.prototype = {
 	/**
 	 * Now we have computed the normalized tickInterval, get the tick positions
 	 */
-	setTickPositions: function () {
-
+	setTickPositions: function ()
+	{
 		var options = this.options,
 			tickPositions,
 			tickPositionsOption = options.tickPositions,
@@ -22606,14 +22606,14 @@ VerticalScroller.prototype = {
                 fixedMax,
                 ext,
                 handleSensitivity = isTouchDevice ? 10 : 7,
-                left,
+                topOfRange,
                 isOnNavigator;
             //chartY > top && chartY < top + height + scrollbarHeight
             if (chartX + scrollerWidth > scrollerLeft && chartX < scrollerLeft + height)
             { // we're horizontally inside the navigator
                 isOnNavigator = !verticalScroller.scrollbarEnabled || chartX + scrollerWidth < scrollerLeft + height;
 
-                // grab the left handle
+                // grab the top handle
                 if (isOnNavigator && math.abs(chartY - zoomedMin - navigatorHeight) < handleSensitivity)
                 {
                     verticalScroller.grabbedLeft = true;
@@ -22621,7 +22621,7 @@ VerticalScroller.prototype = {
                     verticalScroller.fixedExtreme = baseXAxis.max;
                     chart.fixedRange = null;
 
-                    // grab the right handle
+                    // grab the bottom handle
                 } else if (isOnNavigator && math.abs(chartY - zoomedMax - navigatorHeight) < handleSensitivity)
                 {
                     verticalScroller.grabbedRight = true;
@@ -22645,37 +22645,38 @@ VerticalScroller.prototype = {
                     // Center around the clicked point
                     if (isOnNavigator)
                     {
-                        left = chartY - navigatorHeight - range / 2;
+                        topOfRange = chartY - navigatorHeight - range / 2;
 
                         // Click on scrollbar
                     } else
                     {
-                        if (chartY < top - scrollerWidth && chartY > scrollerWidth)
-                        { // Click on scrollbar track, shift the scrollbar by one range}
-                            left = chartY > zoomedMin ? // clicked under the scrollbar
+                        if (chartY < top + scrollerWidth && chartY > scrollerWidth)
+                        { // Click on scrollbar track, shift the scrollbar by one range
+                            topOfRange = chartY > zoomedMin + scrollerWidth ? // clicked under the scrollbar
                                 zoomedMax :
                                 zoomedMin - range;
                         }
                         else if (chartY > top - scrollerWidth)// Click down scrollbar button
                         {
-                            left = zoomedMin + range * 0.2;
-                        } else { // Click up scrollbar button
-                            left = zoomedMin - range * 0.2;
+                            topOfRange = zoomedMin + range * 0.2;
+                        } else
+                        { // Click up scrollbar button
+                            topOfRange = zoomedMin - range * 0.2;
                         }
                     }
-                    if (left < 0)
+                    if (topOfRange < 0)
                     {
-                        left = 0;
-                    } else if (left + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)
+                        topOfRange = 0;
+                    } else if (topOfRange + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)
                     {
-                        left = navigatorHeight - range - 2 * scrollbarWidth;
+                        topOfRange = navigatorHeight - range - 2 * scrollbarWidth;
                         fixedMax = verticalScroller.getUnionExtremes().dataMax; // #2293, #3543
                     }
-                    if (left !== zoomedMin)
+                    if (topOfRange !== zoomedMin)
                     { // it has actually moved
                         verticalScroller.fixedWidth = range; // #1370
 
-                        ext = xAxis.toFixedRange(left, left + range, null, fixedMax);
+                        ext = xAxis.toFixedRange(topOfRange, topOfRange + range, null, fixedMax);
                         baseXAxis.setExtremes(
                             ext.min,
                             ext.max,
@@ -22799,7 +22800,7 @@ VerticalScroller.prototype = {
         var xAxisIndex = chart.xAxis.length,
             yAxisIndex = chart.yAxis.length;
 
-        // make room below the chart
+        // make to the right of the chart
         chart.extraRightMargin = verticalScroller.outlineHeight + navigatorOptions.margin;
 
         if (verticalScroller.navigatorEnabled)
