@@ -22331,9 +22331,12 @@ VerticalScroller.prototype = {
                 translateY: 1
             });
 
-            scrollbarTrack[verb]({
-                height: navigatorHeight - 2 //-2 for the borders.
-            });
+            if (navigatorHeight > 1)
+            {
+                scrollbarTrack[verb]({
+                    height: navigatorHeight - 2 //-2 for the borders.
+                });
+            }
 
             // prevent the scrollbar from drawing to small (#1246)
             scrX = scrollbarWidth + zoomedMin;
