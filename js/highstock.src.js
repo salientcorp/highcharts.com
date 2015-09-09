@@ -21411,7 +21411,7 @@ Scroller.prototype = {
 				// the scrollbar itself
 				scroller.scrollbar = scrollbar = renderer.rect()
 					.attr({
-						y: -scrollbarStrokeWidth % 2 / 2,
+						y: -strokeWidth % 2 / 2,
 						height: scrollbarHeight,
 						fill: scrollbarOptions.barBackgroundColor,
 						stroke: scrollbarOptions.barBorderColor,
@@ -22248,7 +22248,7 @@ VerticalScroller.prototype = {
                 // the scrollbar itself
                 verticalScroller.scrollbar = scrollbar = renderer.rect()
                     .attr({
-                        x: -scrollbarStrokeWidth % 2 / 2,
+                        x: -strokeWidth % 2 / 2,
                         width: scrollbarWidth,
                         fill: scrollbarOptions.barBackgroundColor,
                         stroke: scrollbarOptions.barBorderColor,
@@ -22332,7 +22332,7 @@ VerticalScroller.prototype = {
             });
 
             scrollbarTrack[verb]({
-                height: "100%"
+                height: navigatorHeight - 2 //-2 for the borders.
             });
 
             // prevent the scrollbar from drawing to small (#1246)
