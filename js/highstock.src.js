@@ -21025,7 +21025,6 @@ units[4] = ['day', [1, 2, 3, 4]]; // allow more days
 units[5] = ['week', [1, 2, 3]]; // allow more weeks
 
 defaultSeriesType = seriesTypes.areaspline === UNDEFINED ? 'line' : 'areaspline';
-
 extend(defaultOptions, {
 	navigator: {
 		//enabled: true,
@@ -22048,6 +22047,7 @@ VerticalScroller.prototype = {
             chart = verticalScroller.chart,
             renderer = chart.renderer,
             elementsToDestroy = verticalScroller.elementsToDestroy,
+            navigatorHeight = verticalScroller.navigatorHeight,
             scrollbarButtons = verticalScroller.scrollbarButtons,
             scrollbarWidth = verticalScroller.scrollbarWidth,
             scrollbarOptions = verticalScroller.scrollbarOptions,
@@ -22088,7 +22088,7 @@ VerticalScroller.prototype = {
         // adjust the down button to the varying length of the scroll track
         if (index)
         {
-            params = { translateY: chart.chartHeight - scrollbarWidth - 1 };
+            params = { translateY: navigatorHeight - scrollbarWidth - 1 };
             scrollbarButtons[index].attr(params);
         }
     },
@@ -22147,7 +22147,7 @@ VerticalScroller.prototype = {
 
         //SALIENT PM Using chartWidth instead of plotWidth and adding 5px paddding on right and left sides, so scollbar took up the width of the chart and no longer resized when the plot area changes.
         verticalScroller.navigatorLeft = navigatorLeft = 10 + chart.chartWidth;
-        verticalScroller.navigatorHeight = navigatorHeight = chart.chartHeight//(chart.chartWidth - 10) - (2 * scrollbarWidth);
+        verticalScroller.navigatorHeight = navigatorHeight = isTouchDevice ? chart.chartHeight - 50 : chart.chartHeight//(chart.chartWidth - 10) - (2 * scrollbarWidth);
         verticalScroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarWidth;
         verticalScroller.scrollerHeight = mathMax(scrollerHeight = navigatorHeight + 2 * scrollbarWidth, 0);
 
@@ -22452,9 +22452,7 @@ VerticalScroller.prototype = {
 
 
                     // shift the range by clicking on shaded areas, scrollbar track or scrollbar buttons
-                } else if (chartY < top + scrollerWidth)
-                {
-
+                } else if (chartY < navigatorHeight) {
                     // Center around the clicked point
                     if (isOnNavigator)
                     {
@@ -22462,26 +22460,29 @@ VerticalScroller.prototype = {
 
                         // Click on scrollbar
                     } else {
-                        if (chartY < top + (2 * verticalScroller.scrollbarOptions.buttonBorderWidth) && chartY > scrollerWidth)
-                        { // Click on scrollbar track, shift the scrollbar by one range
-                            topOfRange = chartY > zoomedMin + scrollerWidth ? // clicked under the scrollbar
-                                zoomedMax :
-                                zoomedMin - range;
-                        }
-                        else if (chartY > top - scrollerWidth)// Click down scrollbar button
+                        // Click up scrollbar button
+                        if (chartY < scrollerWidth)
+                        {
+                            topOfRange = zoomedMin - range * 0.2;
+
+                            // Click down scrollbar button
+                        } else if (chartY > navigatorHeight - scrollerWidth)
                         {
                             topOfRange = zoomedMin + range * 0.2;
+
+                            // Click on scrollbar track, shift the scrollbar by one range
                         } else
-                        { // Click up scrollbar button
-                            topOfRange = zoomedMin - range * 0.2;
+                        {
+                            topOfRange = chartY > scrollerWidth + zoomedMin ? // clicked under the scrollbar
+								zoomedMax :
+								zoomedMin - range;
                         }
                     }
                     if (topOfRange < 0)
                     {
                         topOfRange = 0;
-                    } else if (topOfRange + scrollbarWidth + range >= navigatorHeight - scrollbarWidth)
-                    {
-                        topOfRange = navigatorHeight - range - 2 * scrollbarWidth;
+                    } else if (topOfRange + scrollbarWidth + range >= navigatorHeight - scrollbarWidth) {
+                        topOfRange = navigatorHeight - range - (2 * scrollbarWidth);
                         fixedMax = verticalScroller.getUnionExtremes().dataMax; // #2293, #3543
                     }
                     if (topOfRange !== zoomedMin)
@@ -22613,7 +22614,8 @@ VerticalScroller.prototype = {
             yAxisIndex = chart.yAxis.length;
 
         // make room to the right of the chart
-        chart.extraRightMargin = (verticalScroller.outlineHeight * 3) +  navigatorOptions.margin;
+        chart.extraRightMargin = (verticalScroller.outlineHeight * 3) + navigatorOptions.margin;
+        //Add bottom padding to prevent overlapping on touch devices.
 
         if (verticalScroller.navigatorEnabled)
         {
@@ -22679,7 +22681,7 @@ VerticalScroller.prototype = {
                     //SALIENT PM Scroll width doesn't change anymore, so it's just the verticalScroller width plus the two buttons and puts it in the chartWidth.
                     var axis = chart.xAxis[0],
                         ext = axis.getExtremes(),
-                        scrollTrackWidth = verticalScroller.chart.chartHeight - (2 * scrollbarWidth),
+                        scrollTrackWidth = verticalScroller.navigatorHeight - (2 * scrollbarWidth),
                         min = numExt('min', axis.options.min, ext.dataMin),
                         valueRange = numExt('max', axis.options.max, ext.dataMax) - min;
 
@@ -24477,7 +24479,6 @@ wrap(Series.prototype, 'render', function (proceed) {
 	}
 	proceed.call(this);
 });
-
 // global variables
 extend(Highcharts, {
 
