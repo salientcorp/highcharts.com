@@ -22147,7 +22147,7 @@ VerticalScroller.prototype = {
 
         //SALIENT PM Using chartWidth instead of plotWidth and adding 5px paddding on right and left sides, so scollbar took up the width of the chart and no longer resized when the plot area changes.
         verticalScroller.navigatorLeft = navigatorLeft = 10 + chart.chartWidth;
-        verticalScroller.navigatorHeight = navigatorHeight = isTouchDevice ? chart.chartHeight - 50 : chart.chartHeight//(chart.chartWidth - 10) - (2 * scrollbarWidth);
+        verticalScroller.navigatorHeight = navigatorHeight = isTouchDevice ? chart.chartHeight - 25 : chart.chartHeight//(chart.chartWidth - 10) - (2 * scrollbarWidth);
         verticalScroller.scrollerLeft = scrollerLeft = navigatorLeft - scrollbarWidth;
         verticalScroller.scrollerHeight = mathMax(scrollerHeight = navigatorHeight + 2 * scrollbarWidth, 0);
 
