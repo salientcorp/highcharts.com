@@ -1252,7 +1252,7 @@ var adapterRun = adapter.adapterRun,
 defaultOptions = {
 	colors: ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c',
 				'#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'],
-	symbols: ['circle', 'diamond', 'square', 'triangle', 'triangle-down'],
+	symbols: ['circle', 'diamond', 'square', 'triangle', 'triangle-down', 'rectangle'],
 	lang: {
 		loading: 'Loading...',
 		months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -3871,6 +3871,27 @@ SVGRenderer.prototype = {
 				x + w / 2, y + h,
 				'Z'
 			];
+		},
+		'triangledown': function(x, y, w, h)
+		{
+		    return [
+				M, x, y,
+				L, x + w, y,
+				x + w / 2, y + h,
+				'Z'
+		    ];
+		},
+
+		'rectangle': function (x, y, w, h)
+		{
+		    debugger;
+		    return [
+				M, x, y + h / 4,
+				L, x + w, y + h / 4,
+				x + w, y + h / 4 + (h * (10 / 16)),
+				x, y + h / 4 + (h * (10 / 16)),
+				'Z'
+		    ];
 		},
 		'diamond': function (x, y, w, h) {
 			return [
@@ -22170,7 +22191,7 @@ VerticalScroller.prototype = {
         if (isNaN(pxMin) || mathAbs(pxMin) === Infinity)
         { // Verify (#1851, #2238)
             pxMin = 0;
-            pxMax = scrollerWidth;
+            pxMax = scrollbarWidth;
         }
 
         // Are we below the minRange? (#2618)
