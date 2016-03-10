@@ -1252,7 +1252,7 @@ var adapterRun = adapter.adapterRun,
 defaultOptions = {
 	colors: ['#7cb5ec', '#434348', '#90ed7d', '#f7a35c',
 				'#8085e9', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1'],
-	symbols: ['circle', 'diamond', 'square', 'triangle', 'triangle-down', 'rectangle'],
+	symbols: ['circle', 'diamond', 'square', 'triangle', 'triangle-down'],
 	lang: {
 		loading: 'Loading...',
 		months: ['January', 'February', 'March', 'April', 'May', 'June', 'July',
@@ -3884,7 +3884,6 @@ SVGRenderer.prototype = {
 
 		'rectangle': function (x, y, w, h)
 		{
-		    debugger;
 		    return [
 				M, x, y + h / 4,
 				L, x + w, y + h / 4,
@@ -13745,7 +13744,14 @@ Series.prototype = {
 			i,
 			j;
 
-		yData = yData || this.stackedYData || this.processedYData;
+	    var simplifyLogic = xAxis.tickInterval == 1;
+
+	    if (simplifyLogic) {//PO SALIENT setting the Xmin and Xmax to the floor and ceiling of their value so a whole tick is always calculated
+		    xMin = Math.floor(xMin);
+		    xMax = Math.ceil(xMax);
+	    }
+
+	    yData = yData || this.stackedYData || this.processedYData;
 		yDataLength = yData.length;
 
 		for (i = 0; i < yDataLength; i++) {
@@ -13756,8 +13762,9 @@ Series.prototype = {
 			// For points within the visible range, including the first point outside the
 			// visible range, consider y extremes
 			validValue = y !== null && y !== UNDEFINED && (!yAxis.isLog || (y.length || y > 0));
-			withinRange = this.getExtremesFromAll || this.options.getExtremesFromAll || this.cropped ||
-				((xData[i + 1] || x) >= xMin &&	(xData[i - 1] || x) <= xMax);
+		    withinRange = this.getExtremesFromAll || this.options.getExtremesFromAll || this.cropped ||
+		    (simplifyLogic ? ((x) >= xMin && (x) <= xMax) : //PO SALIENT Simplified Logic for singleTicks so it doesn't look ahead or behind on ticks, just evaluate what's there for scale.
+		    ((xData[i + 1] || x) >= xMin && (xData[i - 1] || x) <= xMax));
 
 			if (validValue && withinRange) {
 
@@ -16389,7 +16396,8 @@ var ColumnSeries = extendClass(Series, {
 			var yBottom = pick(point.yBottom, translatedThreshold),
 				safeDistance = 999 + mathAbs(yBottom),
 				plotY = mathMin(mathMax(-safeDistance, point.plotY), yAxis.len + safeDistance), // Don't draw too far outside plot area (#1303, #2241, #4264)
-				barX = point.plotX + pointXOffset,
+                plotY = plotY < 0 ? 0 : plotY,
+                barX = point.plotX + pointXOffset,
 				barW = seriesBarW,
 				barY = mathMin(plotY, yBottom),
 				right,
